@@ -1,7 +1,7 @@
 {
     "name": "try-to/swoole-media-server",
     "description": "swoole media server",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "try-to",
@@ -10,7 +10,7 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": ">=7.0.0"
+        "php": ">7.1"
     },
     "autoload": {
         "psr-4": {
