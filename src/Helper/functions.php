@@ -13,7 +13,6 @@ namespace TrytoMediaServer\Helper;
  */
 function mk_dir(string &$path)
 {
-    $path = str_replace('ROOT', ROOT, $path);
     if (!file_exists(dirname($path))) {
         mkdir(dirname($path), 0755, true);
     }
@@ -43,15 +42,27 @@ function replace_constant(string &$const, string $default = '')
  */
 function tryto_env($name, $default = null)
 {
-    $result = getenv(ENV_PREFIX . strtoupper(str_replace('.', '_', $name)));
-
-    // 常量转换
-    $result = str_replace('ROOT_PATH', ROOT_PATH, $result);
+    $result = false;
+    if (isset(TRYTO_CONF[strtoupper(str_replace('.', '_', $name))])) {
+        $result = TRYTO_CONF[strtoupper(str_replace('.', '_', $name))];
+    }
     if (false !== $result) {
         if ('false' === $result) {
             $result = false;
         } elseif ('true' === $result) {
             $result = true;
+        } else {
+            // 常量转换
+            $result = str_replace(['ROOT_PATH'], [ROOT_PATH], $result);
+
+            //替换swoole 常量
+            if ($result == 'SWOOLE_PROCESS') {
+                $result = SWOOLE_PROCESS;
+            }
+
+            if ($result == 'SWOOLE_SOCK_TCP') {
+                $result = SWOOLE_SOCK_TCP;
+            }
         }
         return $result;
     }

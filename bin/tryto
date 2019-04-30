@@ -4,4 +4,4 @@
 require_once __DIR__.'/bootstrap.php';
 
 // Run application
-(new \TrytoMediaServer\Command())->run();
+(new TrytoMediaServer\Command\Command())->run($argv);

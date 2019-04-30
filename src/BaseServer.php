@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare (strict_types = 1);
 
 /*
  * @Author: try-to w@tryto.cn
@@ -13,9 +13,10 @@ class BaseServer extends Base
     protected $server;
 
     protected $host = '0.0.0.0';
-    protected $ports = 9501;
+    protected $port = 9501;
     protected $mode = null;
     protected $sock_type = null;
+    protected $pid_file = null;
     protected $options = [];
 
     /**
@@ -24,9 +25,12 @@ class BaseServer extends Base
      */
     public function __construct()
     {
+        // 初始化
+        $this->init();
+
         try {
 
-            $this->server = new \Swoole\Server($this->host, $this->ports, $this->mode, $this->sock_type);
+            $this->server = new \Swoole\Server($this->host, $this->port, $this->mode, $this->sock_type);
 
             $this->server->set($this->options);
             $this->server->on('connect', [$this, 'onConnect']);
@@ -51,6 +55,16 @@ class BaseServer extends Base
     }
 
     /**
+     * init
+     *
+     * @return void
+     */
+    protected function init()
+    {
+
+    }
+
+    /**
      * onConnect
      *
      * @param \swoole_server $server
@@ -61,7 +75,7 @@ class BaseServer extends Base
     {
 
     }
-    
+
     /**
      * onReceive
      *
@@ -96,7 +110,7 @@ class BaseServer extends Base
      */
     public function onStart(\swoole_server $server)
     {
-        \file_put_contents(CONFIG['server']['swoole']['pid_file'], $server->master_pid . ',' . $server->manager_pid);
+        @file_put_contents($this->pid_file, $server->master_pid . ',' . $server->manager_pid);
         ProcessHelper::setProcessTitle('TrytoMediaServer master  process');
     }
 
