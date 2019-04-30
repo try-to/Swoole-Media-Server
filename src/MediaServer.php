@@ -1,4 +1,4 @@
-<?php declare (strict_types = 1);
+<?php declare(strict_types = 1);
 
 /*
  * @Author: try-to w@tryto.cn
@@ -44,7 +44,7 @@ class MediaServer extends BaseServer
      */
     public function onConnect(\swoole_server $server, int $fd)
     {
-
+        echo 'Connect fd:' . $fd . PHP_EOL;
     }
 
     /**
@@ -58,7 +58,9 @@ class MediaServer extends BaseServer
      */
     public function onReceive(\swoole_server $server, int $fd, int $reactor_id, string $data)
     {
-
+        echo 'Receive fd:' . $fd . PHP_EOL;
+        echo 'Receive reactor_id:' . $reactor_id . PHP_EOL;
+        echo 'Receive data:' . $data . PHP_EOL;
     }
 
     /**
@@ -81,6 +83,7 @@ class MediaServer extends BaseServer
      */
     public function onClose(\swoole_server $server, int $fd)
     {
+        echo 'Close fd:' . $fd . PHP_EOL;
         parent::onClose($server, $fd);
     }
 }
