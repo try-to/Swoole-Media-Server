@@ -7,7 +7,7 @@ defined('ROOT_PATH') or define('ROOT_PATH', IN_PHAR ? dirname(Phar::running(fals
 defined('ENV_PREFIX') or define('ENV_PREFIX', 'TRYTO_'); // 环境变量的配置前缀
 
 // Composer autoload
-require_once ROOT_PATH . '/../vendor/autoload.php';
+require_once ROOT_PATH . '/vendor/autoload.php';
 
 // Check requirements - PHP
 if (version_compare(PHP_VERSION, '7.0', '<')) {
@@ -24,10 +24,10 @@ if (extension_loaded('swoole') && defined('SWOOLE_VERSION')) {
 }
 
 // 加载环境变量配置文件
-if (is_file(ROOT_PATH . '/../.env')) {
-    $env = parse_ini_file(ROOT_PATH . '/../.env', true);
+if (is_file(ROOT_PATH . '/.env')) {
+    $env = parse_ini_file(ROOT_PATH . '/.env', true);
     foreach ($env as $key => $val) {
-       $name = ENV_PREFIX . strtoupper($key);
+        $name = ENV_PREFIX . strtoupper($key);
         if (is_array($val)) {
             foreach ($val as $k => $v) {
                 $item = $name . '_' . strtoupper($k);

@@ -96,6 +96,7 @@ class BaseServer extends Base
      */
     public function onStart(\swoole_server $server)
     {
+        \file_put_contents(CONFIG['server']['swoole']['pid_file'], $server->master_pid . ',' . $server->manager_pid);
         ProcessHelper::setProcessTitle('TrytoMediaServer master  process');
     }
 

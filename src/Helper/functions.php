@@ -7,15 +7,46 @@
 namespace TrytoMediaServer\Helper;
 
 /**
+ * 创建目录.
+ *
+ * @param string $path
+ */
+function mk_dir(string &$path)
+{
+    $path = str_replace('ROOT', ROOT, $path);
+    if (!file_exists(dirname($path))) {
+        mkdir(dirname($path), 0755, true);
+    }
+}
+
+/**
+ * 替换常量值
+ *
+ * @param string $const
+ * @param string $default
+ */
+function replace_constant(string &$const, string $default = '')
+{
+    if (defined($const)) {
+        $const = constant($const);
+    } else {
+        $const = $default;
+    }
+}
+
+/**
  * 获取环境变量值
  * @access public
  * @param  string $name    环境变量名（支持二级 . 号分割）
  * @param  string $default 默认值
  * @return mixed
  */
-function _env($name, $default = null)
+function tryto_env($name, $default = null)
 {
     $result = getenv(ENV_PREFIX . strtoupper(str_replace('.', '_', $name)));
+
+    // 常量转换
+    $result = str_replace('ROOT_PATH', ROOT_PATH, $result);
     if (false !== $result) {
         if ('false' === $result) {
             $result = false;
@@ -45,7 +76,6 @@ function tryto_error($message, $exitCode = 0)
     } else {
         $message = 'ERROR: ' . $message;
     }
-    if (!$prefixExists || 'ERROR' == $parts[0]) {
-        exit($exitCode);
-    }
+    echo $message . PHP_EOL;
+    exit($exitCode);
 }
