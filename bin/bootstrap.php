@@ -26,7 +26,7 @@ if (is_file(ROOT_PATH . '/.env')) {
     }
     defined('TRYTO_CONF') or define('TRYTO_CONF', $config);
 } else {
-    tryto_error('ERROR: .env 配置项不存在!');
+    tryto_error('ERROR: .env is empty!');
 }
 
 // Check requirements - PHP

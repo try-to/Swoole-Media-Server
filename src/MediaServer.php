@@ -20,6 +20,11 @@ class MediaServer extends BaseServer
 
     public function init()
     {
+        if (!empty(tryto_env('server.log_file'))) {
+            mk_dir(tryto_env('server.log_file'));
+        } else {
+            tryto_error('ERROR:server.log_file is empty!');
+        }
         $this->host = tryto_env('server.host');
         $this->port = tryto_env('server.port');
         $this->mode = tryto_env('server.mode');

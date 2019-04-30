@@ -18,11 +18,6 @@ class Command
      */
     public function run(array $argv)
     {
-        if (!empty(tryto_env('server.pid_file'))) {
-            mk_dir(tryto_env('server.pid_file'));
-        } else {
-            tryto_error('ERROR:server.pid_file 配置项不存在!');
-        }
         // 一键协程化
         \Swoole\Runtime::enableCoroutine(true, SWOOLE_HOOK_ALL ^ SWOOLE_HOOK_FILE);
 

@@ -30,6 +30,15 @@ class BaseServer extends Base
 
         try {
 
+            if (!empty($this->pid_file)) {
+                mk_dir($this->pid_file);
+            } else {
+                tryto_error('ERROR:server.pid_file is empty!');
+            }
+
+            if(empty($this->host) || empty($this->port)){
+                tryto_error('ERROR:server host or server port is empty!');
+            }
             $this->server = new \Swoole\Server($this->host, $this->port, $this->mode, $this->sock_type);
 
             $this->server->set($this->options);
