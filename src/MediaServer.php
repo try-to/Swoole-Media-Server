@@ -9,6 +9,7 @@ namespace TrytoMediaServer;
 use function TrytoMediaServer\Helper\mk_dir;
 use function TrytoMediaServer\Helper\tryto_env;
 use function TrytoMediaServer\Helper\tryto_error;
+use function TrytoMediaServer\Helper\getBytes;
 
 class MediaServer extends BaseServer
 {
