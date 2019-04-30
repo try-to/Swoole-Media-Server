@@ -6,6 +6,8 @@
  */
 namespace TrytoMediaServer;
 
+use function TrytoMediaServer\Helper\mk_dir;
+use function TrytoMediaServer\Helper\tryto_error;
 use TrytoMediaServer\Exceptions\BaseException;
 
 class BaseServer extends Base
@@ -36,7 +38,7 @@ class BaseServer extends Base
                 tryto_error('ERROR:server.pid_file is empty!');
             }
 
-            if(empty($this->host) || empty($this->port)){
+            if (empty($this->host) || empty($this->port)) {
                 tryto_error('ERROR:server host or server port is empty!');
             }
             $this->server = new \Swoole\Server($this->host, $this->port, $this->mode, $this->sock_type);
