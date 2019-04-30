@@ -2,6 +2,7 @@
 
 namespace TrytoMediaServer\Protocols;
 
+use TrytoMediaServer\Interfaces\ProtocolInterface;
 /**
  * rtmp protocol
  */
@@ -24,7 +25,7 @@ class Rtmp extends ProtocolInterface
      * @param string  $payload
      * @return string
      */
-    public static function encode($payload)
+    public static function encode(string $payload)
     {
 
     }
@@ -35,7 +36,7 @@ class Rtmp extends ProtocolInterface
      * @param string   $buffer
      * @return string
      */
-    public static function decode($bytes)
+    public static function decode(string $bytes)
     {
 
     }
