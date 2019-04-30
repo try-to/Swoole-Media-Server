@@ -2,9 +2,6 @@
 
 namespace TrytoMediaServer\Command;
 
-use function TrytoMediaServer\Helper\tryto_env;
-use function TrytoMediaServer\Helper\tryto_error;
-
 class ServerCommand
 {
     public $logo;

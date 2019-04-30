@@ -2,9 +2,6 @@
 
 namespace TrytoMediaServer\Command;
 
-use function TrytoMediaServer\Helper\mk_dir;
-use function TrytoMediaServer\Helper\tryto_env;
-use function TrytoMediaServer\Helper\tryto_error;
 use TrytoMediaServer\Helper\PhpHelper;
 
 class Command
@@ -18,6 +15,7 @@ class Command
      */
     public function run(array $argv)
     {
+        require_once __DIR__ . '/../Helper/functions.php';
         // 一键协程化
         \Swoole\Runtime::enableCoroutine(true, SWOOLE_HOOK_ALL ^ SWOOLE_HOOK_FILE);
 

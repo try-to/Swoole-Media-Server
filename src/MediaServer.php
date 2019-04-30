@@ -6,8 +6,6 @@
  */
 namespace TrytoMediaServer;
 
-use function TrytoMediaServer\Helper\tryto_env;
-
 class MediaServer extends BaseServer
 {
 
