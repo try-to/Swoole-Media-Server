@@ -32,7 +32,7 @@ class ServerCommand
         }
         echo $this->logo, PHP_EOL;
         echo 'Server starting ...', PHP_EOL;
-        // new \TrytoMediaServer\MediaServer();
+        new \TrytoMediaServer\MediaServer();
     }
 
     /**
