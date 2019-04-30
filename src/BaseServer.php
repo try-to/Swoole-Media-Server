@@ -147,7 +147,7 @@ class BaseServer extends Base
      */
     protected function onClose(\swoole_server $server, int $fd)
     {
-        $cid = Coroutine::getuid();
+        $cid = \Swoole\Coroutine::getuid();
         if ($cid > 0 && isset(self::$pool[$cid])) {
             unset(self::$pool[$cid]);
         }
