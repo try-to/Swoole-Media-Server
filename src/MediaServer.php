@@ -60,7 +60,9 @@ class MediaServer extends BaseServer
     {
         echo 'Receive fd:' . $fd . PHP_EOL;
         echo 'Receive reactor_id:' . $reactor_id . PHP_EOL;
-        echo 'Receive data:' . $data . PHP_EOL;
+        // echo 'Receive data:' . $data . PHP_EOL;
+
+        var_dump(getBytes($data));
     }
 
     /**
