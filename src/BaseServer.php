@@ -36,10 +36,12 @@ class BaseServer extends Base
                 mk_dir($this->pid_file);
             } else {
                 tryto_error('ERROR:server.pid_file is empty!');
+                return false;
             }
 
             if (empty($this->host) || empty($this->port)) {
                 tryto_error('ERROR:server host or server port is empty!');
+                return false;
             }
             $this->server = new \Swoole\Server($this->host, $this->port, $this->mode, $this->sock_type);
 
