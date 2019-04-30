@@ -9,7 +9,7 @@ namespace TrytoMediaServer;
 use function TrytoMediaServer\Helper\mk_dir;
 use function TrytoMediaServer\Helper\tryto_env;
 use function TrytoMediaServer\Helper\tryto_error;
-use function TrytoMediaServer\Helper\getBytes;
+use TrytoMediaServer\Protocols\Rtmp;
 
 class MediaServer extends BaseServer
 {
@@ -61,7 +61,8 @@ class MediaServer extends BaseServer
     {
         echo 'Receive fd:' . $fd . ' data:'. $data . PHP_EOL;;
 
-        // var_dump(getBytes($data));
+        Rtmp::decode($data);
+    
     }
 
     /**
