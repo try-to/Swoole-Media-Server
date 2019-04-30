@@ -90,3 +90,60 @@ function tryto_error($message, $exitCode = 0)
     echo $message . PHP_EOL;
     exit($exitCode);
 }
+
+/**
+ * 数组复制.
+ *
+ * @param $array
+ * @param $start
+ * @param $len
+ *
+ * @return array
+ */
+function array_copy(array $array, int $start, int $len)
+{
+    return array_slice($array, $start, $len);
+}
+
+/**
+ * 获取bytes 数组
+ *
+ * @param $data
+ *
+ * @return array
+ */
+function getBytes(string $data)
+{
+    $bytes = [];
+    $count = strlen($data);
+    for ($i = 0; $i < $count; $i++) {
+        $byte = ord($data[$i]);
+        $bytes[] = $byte;
+    }
+    return $bytes;
+}
+
+/**
+ * 获取 string.
+ *
+ * @param array $bytes
+ *
+ * @return string
+ */
+function getString(array $bytes)
+{
+    return implode(array_map('chr', $bytes));
+}
+
+/**
+ * 无符号16位右移.
+ *
+ * @param int $x    要进行操作的数字
+ * @param int $bits 右移位数
+ *
+ * @return int
+ */
+function shr16(int $x, int $bits)
+{
+    return ((2147483647 >> ($bits - 1)) & ($x >> $bits)) > 255 ? 255 : ((2147483647 >> ($bits - 1)) & ($x >> $bits));
+}
