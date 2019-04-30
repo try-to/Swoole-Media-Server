@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php declare(strict_types=1);
+
+// Check requirements - PHP
+if (version_compare(PHP_VERSION, '7.1', '<')) {
+    exit("ERROR: TrytoMediaServer requires [PHP >= 7.1].\n");
+}
+
+// Check requirements - Swoole
+if (extension_loaded('swoole') && defined('SWOOLE_VERSION')) {
+    if (version_compare(SWOOLE_VERSION, '4.0', '<')) {
+        exit("ERROR: TrytoMediaServer requires [Swoole >= 4.0].\n");
+    }
+} else {
+    exit("ERROR: Swoole was not installed.\n");
+}
+
+// Bootstrap
+require_once __DIR__ . '/bootstrap.php';
+
+//\Swoole\Runtime::enableCoroutine();
+//Swoole\Coroutine::set([
+//    'max_coroutine' => 300000,
+//]);
+
+// Run application
+(new \TrytoMediaServer\Server())->run();

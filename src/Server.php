@@ -9,4 +9,20 @@ namespace TrytoMediaServer;
 class Server
 {
 
+    /**
+     * __construct
+     * @return void
+     */
+    public function __construct()
+    {
+
+    }
+
+    /**
+     * run
+     * @return void
+     */
+    public function run(){
+
+    }
 }
