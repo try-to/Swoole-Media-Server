@@ -9,19 +9,19 @@ interface ProtocolInterface
      * @param string              $buffer
      * @return int
      */
-    public function input(string $buffer): int;
+    public static function input(string $buffer): int;
     /**
      * encode.
      *
      * @param string  $payload
      * @return string
      */
-    public function encode(string $payload): string;
+    public static function encode(string $payload): string;
     /**
      * decode.
      *
      * @param string   $buffer
      * @return string
      */
-    public function decode(string $buffer): string;
+    public static function decode(string $buffer): string;
 }
