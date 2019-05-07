@@ -57,7 +57,7 @@ class Rtmp implements ProtocolInterface
      */
     public static function decode($buffer, $fd, $server)
     {
-        if(!isset(self::$handshakeFds[$fd])){
+        if(!in_array($fd,self::$handshakeFds)){
             self::$handshakeState = 0;
             self::$c0 = 0;
             self::$c1 = 0;
@@ -132,6 +132,7 @@ class Rtmp implements ProtocolInterface
                 break;
             case RtmpPacket::RTMP_HANDSHAKE_2:
             default:
+                self::$handshakeFds[] = $fd;
                 self::rtmpChunkRead($buffer, $fd, $server);
                 break;
         }
