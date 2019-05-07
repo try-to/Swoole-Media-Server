@@ -68,7 +68,7 @@ class Rtmp implements ProtocolInterface
             } else if (strlen($buffer) == 1) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
             } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
-                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
             }
             echo 'handshake:' . self::$handshake . PHP_EOL;
         }
@@ -89,7 +89,11 @@ class Rtmp implements ProtocolInterface
             $server->send($fd, $stream->dump());
 
             $stream = new RtmpStream();
-            $stream->write(self::$c1);
+            $stream->writeInt32(self::$c1->readInt32());
+		    self::$c1->readInt32();
+            $stream->writeInt32($ctime);
+            $raw = self::$c1->readRaw();
+            $stream->write($raw);
             $server->send($fd, $stream->dump());
 
             self::$handshake = 1;
