@@ -2,6 +2,9 @@
 
 namespace TrytoMediaServer\Protocols;
 
+/**
+ * Protocol interface
+ */
 interface ProtocolInterface
 {
     /**
@@ -9,19 +12,21 @@ interface ProtocolInterface
      * @param string              $buffer
      * @return int
      */
-    public static function input(string $buffer): int;
+    public static function input(string $buffer);
+
     /**
      * encode.
      *
      * @param string  $payload
      * @return string
      */
-    public static function encode(string $payload): string;
+    public static function encode(string $payload);
+    
     /**
      * decode.
      *
      * @param string   $buffer
      * @return string
      */
-    public static function decode(string $buffer): string;
+    public static function decode(string $buffer);
 }
