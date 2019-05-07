@@ -99,7 +99,6 @@ class Rtmp implements ProtocolInterface
             $server->send($fd, $stream->dump());
 
             self::$handshake = 1;
-            echo 'handshake:' . self::$handshake . PHP_EOL;
         }
 
         if (self::$handshake == 1) {
@@ -114,6 +113,7 @@ class Rtmp implements ProtocolInterface
         }
 
         if (self::$handshake == 2) {
+            echo 'handshake:' . self::$handshake . PHP_EOL;
             echo PHP_EOL.'packet:'. PHP_EOL;
             var_dump($buffer);
         }
