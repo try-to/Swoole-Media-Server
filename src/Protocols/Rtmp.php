@@ -18,7 +18,6 @@ class Rtmp implements ProtocolInterface
      */
     public static function input($buffer)
     {
-        var_dump(unpack('C*', $buffer));
         return $buffer;
     }
 

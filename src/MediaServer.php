@@ -59,7 +59,9 @@ class MediaServer extends BaseServer
      */
     public function onReceive(\swoole_server $server, int $fd, int $reactor_id, string $data)
     {
-        echo 'Receive fd:' . $fd . ' data:'. $data . PHP_EOL;;
+        // echo 'Receive fd:' . $fd . ' data:'. $data . PHP_EOL;
+
+        var_dump(unpack('C*', $data));
 
         Rtmp::decode($data);
     
