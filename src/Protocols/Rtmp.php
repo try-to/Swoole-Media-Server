@@ -83,12 +83,12 @@ class Rtmp implements ProtocolInterface
                 $stream->writeByte(rand(0, 256));
             }
             $server->send($fd, $stream->dump());
-            self::$handshake == 1;
+            self::$handshake = 1;
             echo 'handshake:' . self::$handshake . PHP_EOL;
         }
 
         if (self::$handshake == 1) {
-            self::$handshake == 2;
+            self::$handshake = 2;
             echo 'handshake:' . self::$handshake . PHP_EOL;
             self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
 
