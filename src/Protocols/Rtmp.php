@@ -7,7 +7,7 @@ use TrytoMediaServer\Protocols\ProtocolInterface;
 /**
  * rtmp protocol
  */
-class Rtmp extends ProtocolInterface
+class Rtmp implements ProtocolInterface
 {
 
     /**
