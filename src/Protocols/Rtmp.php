@@ -83,12 +83,12 @@ class Rtmp implements ProtocolInterface
     {
         switch (self::$handshakeState) {
             case RtmpPacket::RTMP_HANDSHAKE_0:
-                if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
+                if ((strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) && !self::$c0 && !self::$c1) {
                     self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
                     self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
-                } elseif (strlen($buffer) == 1) {
+                } elseif (strlen($buffer) == 1 && !self::$c0) {
                     self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-                } elseif (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
+                } elseif (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE && !self::$c1) {
                     self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
                 }
                 if (self::$c0 && self::$c1) {
@@ -116,14 +116,14 @@ class Rtmp implements ProtocolInterface
                     $stream->write($raw);
                     $server->send($fd, $stream->dump());
 
-                    self::$handshakeState = RTMP_HANDSHAKE_1;
+                    self::$handshakeState = RtmpPacket::RTMP_HANDSHAKE_1;
                 }
                 break;
             case RtmpPacket::RTMP_HANDSHAKE_1:
                 // 收到c2
                 self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
                 if (!empty(self::$c2)) {
-                    self::$handshakeState = RTMP_HANDSHAKE_2;
+                    self::$handshakeState = RtmpPacket::RTMP_HANDSHAKE_2;
                 }
                 break;
             case RtmpPacket::RTMP_HANDSHAKE_2:
