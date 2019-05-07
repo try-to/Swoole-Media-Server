@@ -67,7 +67,7 @@ class Rtmp implements ProtocolInterface
             } else if (strlen($buffer) == 1) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
             } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
-                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
+                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
             }
         }
 
