@@ -16,7 +16,7 @@ class Rtmp implements ProtocolInterface
      * @param string  $buffer
      * @return int
      */
-    protected static function input(string $buffer)
+    public static function input(string $buffer)
     {
         return $buffer;
     }
@@ -27,7 +27,7 @@ class Rtmp implements ProtocolInterface
      * @param string  $payload
      * @return string
      */
-    protected static function encode(string $payload)
+    public static function encode(string $payload)
     {
         return $payload;
     }
@@ -38,7 +38,7 @@ class Rtmp implements ProtocolInterface
      * @param string   $buffer
      * @return string
      */
-    protected static function decode(string $buffer)
+    public static function decode(string $buffer)
     {
         return $buffer;
     }
