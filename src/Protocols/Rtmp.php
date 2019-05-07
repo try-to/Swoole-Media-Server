@@ -69,26 +69,27 @@ class Rtmp implements ProtocolInterface
             } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
                 self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
             }
+            echo 'handshake:' . self::$handshake . PHP_EOL;
         }
 
         if (self::$c0 && self::$c1 && self::$handshake == 0) {
             // 收到c0 c1 发送s0 s1
-            if ($server->exist($fd)) {
-                $stream = new RtmpStream();
-                $stream->writeByte(3); // 当前RTMP协议的版本为 3
-                $ctime = time();
-                $stream->writeInt32($ctime); //Time 4
-                $stream->writeInt32(0); // zero 4
-                for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
-                    $stream->writeByte(rand(0, 256));
-                }
-                $server->send($fd, $stream->dump());
-                self::$handshake == 1;
+            $stream = new RtmpStream();
+            $stream->writeByte(3); // 当前RTMP协议的版本为 3
+            $ctime = time();
+            $stream->writeInt32($ctime); //Time 4
+            $stream->writeInt32(0); // zero 4
+            for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
+                $stream->writeByte(rand(0, 256));
             }
+            $server->send($fd, $stream->dump());
+            self::$handshake == 1;
+            echo 'handshake:' . self::$handshake . PHP_EOL;
         }
 
         if (self::$handshake == 1) {
             self::$handshake == 2;
+            echo 'handshake:' . self::$handshake . PHP_EOL;
             self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
 
             // 发送S2
