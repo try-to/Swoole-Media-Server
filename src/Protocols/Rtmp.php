@@ -24,6 +24,11 @@ class Rtmp implements ProtocolInterface
 
     private static $operations = array();
 
+    private static $c0c1 = false;
+    private static $c0 = 0;
+    private static $c1 = 0;
+    private static $c2 = 0;
+
     /**
      * Check the integrity of the package.
      *
@@ -55,29 +60,47 @@ class Rtmp implements ProtocolInterface
     public static function decode($buffer, $fd, $server)
     {
         // $stream = new RtmpStream();
-        $c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-
-        $c1 = self::readBuffer($buffer, 1, 1536);
-
-        // 发送s0 s1 s2
-        // $c1 = self::readBuffer($buffer, 1536);
-        // $packet = self::readPacket($buffer);
-        if ($server->exist($fd)) {
-            $stream = new RtmpStream();
-            $stream->writeByte(3);
-            $ctime = time();
-            $stream->writeInt32($ctime); //Time 4
-            $stream->writeInt32(0); // zero 4
-            for ($i = 0; $i < 1536 - 8; $i++) {
-                $stream->writeByte(rand(0, 256));
+        if (!self::$c0 || !self::$c1) {
+            if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
+                self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
+                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
+            } else if (strlen($buffer) == 1) {
+                self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
+            } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
+                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
             }
-            $server->send($fd, $stream->dump());
         }
 
-        echo 'C0' . PHP_EOL;
-        var_dump($c0);
-        echo PHP_EOL . 'C1' . PHP_EOL;
-        var_dump($c1);
+        if (self::$c0 && self::$c1) {
+            echo 'C0' . PHP_EOL;
+            var_dump(self::$c0);
+            echo PHP_EOL . 'C1' . PHP_EOL;
+            var_dump(self::$c1);
+            // 收到c0 c1 发送s0 s1
+            if ($server->exist($fd)) {
+                $stream = new RtmpStream();
+                $stream->writeByte(3);
+                $ctime = time();
+                $stream->writeInt32($ctime); //Time 4
+                $stream->writeInt32(0); // zero 4
+                for ($i = 0; $i < 1536 - 8; $i++) {
+                    $stream->writeByte(rand(0, 256));
+                }
+                $server->send($fd, $stream->dump());
+                self::$c0 = 0;
+                self::$c1 = 0;
+                self::$c0c1 = true;
+            }
+        }
+
+        if (self::$c0c1) {
+            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
+            echo 'C2' . PHP_EOL;
+            var_dump(self::$c2);
+        }
+
+        // $c1 = self::readBuffer($buffer, 1536);
+        // $packet = self::readPacket($buffer);
 
         return $buffer;
     }

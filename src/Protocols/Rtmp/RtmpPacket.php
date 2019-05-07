@@ -4,6 +4,8 @@ namespace TrytoMediaServer\Protocols\Rtmp;
 
 class RtmpPacket
 {
+	const RTMP_SIG_SIZE = 1536;
+	
 	const TYPE_CHUNK_SIZE = 0x01;
 	const TYPE_READ_REPORT = 0x03;
 	const TYPE_PING = 0x04;
