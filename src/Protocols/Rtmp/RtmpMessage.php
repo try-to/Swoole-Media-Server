@@ -2,6 +2,7 @@
 
 namespace TrytoMediaServer\Protocols\Rtmp;
 
+require_once __DIR__ . '/SabreAMF/Serializer.php';
 require_once __DIR__ . '/SabreAMF/OutputStream.php';
 require_once __DIR__ . '/SabreAMF/InputStream.php';
 require_once __DIR__ . '/SabreAMF/AMF0/Serializer.php';
