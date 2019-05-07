@@ -64,17 +64,17 @@ class Rtmp implements ProtocolInterface
         if (self::$handshake == 0) {
             if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE)->dump();
+                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
             } else if (strlen($buffer) == 1) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
             } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
-                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->dump();
+                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
             }
             echo 'handshake:' . self::$handshake . PHP_EOL;
         }
 
         if (self::$c0 && self::$c1 && self::$handshake == 0) {
-            // 收到c0 c1 发送s0 s1
+            // 收到c0 c1 发送s0 s1 s2
             $stream = new RtmpStream();
             $stream->writeByte(3); // 当前RTMP协议的版本为 3
             $ctime = time();
@@ -84,24 +84,28 @@ class Rtmp implements ProtocolInterface
                 $stream->writeByte(rand(0, 256));
             }
             $server->send($fd, $stream->dump());
+
+            $stream = new RtmpStream();
+            $stream->write(self::$c1);
+            $server->send($fd, $stream->dump());
+
             self::$handshake = 1;
             echo 'handshake:' . self::$handshake . PHP_EOL;
         }
 
         if (self::$handshake == 1) {
             // 收到c2
-            self::$handshake = 2;
             echo 'handshake:' . self::$handshake . PHP_EOL;
             self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->dump();
             if(!empty(self::$c2)){
                 // 发送S2
-                $server->send($fd, self::$c1);
+                // $server->send($fd, self::$c1);
                 self::$handshake = 2;
             }
         }
 
         if (self::$handshake == 2) {
-            echo 'packet:'. PHP_EOL;
+            echo PHP_EOL.'packet:'. PHP_EOL;
             var_dump($buffer);
         }
 
