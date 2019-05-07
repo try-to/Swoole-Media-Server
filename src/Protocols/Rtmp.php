@@ -78,8 +78,12 @@ class Rtmp implements ProtocolInterface
             var_dump(self::$c1);
             // 收到c0 c1 发送s0 s1
             if ($server->exist($fd)) {
+
                 $stream = new RtmpStream();
                 $stream->writeByte(3); // 当前RTMP协议的版本为 3
+                $server->send($fd, $stream->dump());
+
+                $stream = new RtmpStream();
                 $ctime = time();
                 $stream->writeInt32($ctime); //Time 4
                 $stream->writeInt32(0); // zero 4
@@ -87,8 +91,6 @@ class Rtmp implements ProtocolInterface
                     $stream->writeByte(rand(0, 256));
                 }
                 $server->send($fd, $stream->dump());
-                self::$c0 = 0;
-                self::$c1 = 0;
                 self::$c0c1 = true;
             }
         }
