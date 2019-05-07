@@ -3,7 +3,6 @@
 namespace TrytoMediaServer\Protocols;
 
 use TrytoMediaServer\Protocols\ProtocolInterface;
-use TrytoMediaServer\Protocols\Rtmp\RtmpOperation;
 use TrytoMediaServer\Protocols\Rtmp\RtmpPacket;
 use TrytoMediaServer\Protocols\Rtmp\RtmpStream;
 
@@ -31,7 +30,7 @@ class Rtmp implements ProtocolInterface
      * @param string  $buffer
      * @return int
      */
-    public static function input($buffer)
+    public static function input($buffer, $fd, $server)
     {
         return $buffer;
     }
@@ -42,7 +41,7 @@ class Rtmp implements ProtocolInterface
      * @param string  $payload
      * @return string
      */
-    public static function encode($payload)
+    public static function encode($payload, $fd, $server)
     {
         return $payload;
     }
@@ -53,19 +52,31 @@ class Rtmp implements ProtocolInterface
      * @param string   $buffer
      * @return string
      */
-    public static function decode($buffer)
+    public static function decode($buffer, $fd, $server)
     {
         // $stream = new RtmpStream();
         $c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
 
         $c1 = self::readBuffer($buffer, 1, 1536);
 
+        // 发送s0 s1 s2
         // $c1 = self::readBuffer($buffer, 1536);
         // $packet = self::readPacket($buffer);
+        if ($server->exist($fd)) {
+            $stream = new RtmpStream();
+            $stream->writeByte(3);
+            $ctime = time();
+            $stream->writeInt32($ctime); //Time 4
+            $stream->writeInt32(0); // zero 4
+            for ($i = 0; $i < 1536 - 8; $i++) {
+                $stream->writeByte(rand(0, 256));
+            }
+            $server->send($fd, $stream->dump());
+        }
 
-        echo 'C0'.PHP_EOL;
+        echo 'C0' . PHP_EOL;
         var_dump($c0);
-        echo PHP_EOL.'C1'.PHP_EOL;
+        echo PHP_EOL . 'C1' . PHP_EOL;
         var_dump($c1);
 
         return $buffer;

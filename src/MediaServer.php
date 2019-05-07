@@ -1,4 +1,4 @@
-<?php declare(strict_types = 1);
+<?php declare (strict_types = 1);
 
 /*
  * @Author: try-to w@tryto.cn
@@ -60,8 +60,8 @@ class MediaServer extends BaseServer
     public function onReceive(\swoole_server $server, int $fd, int $reactor_id, string $data)
     {
         // echo 'Receive fd:' . $fd . ' data:'. $data . PHP_EOL;
-        Rtmp::decode($data);
-    
+        Rtmp::decode($data, $fd, $server);
+
     }
 
     /**

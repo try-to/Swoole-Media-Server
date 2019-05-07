@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare (strict_types = 1);
 
 namespace TrytoMediaServer\Protocols;
 
@@ -12,7 +12,7 @@ interface ProtocolInterface
      * @param string              $buffer
      * @return int
      */
-    public static function input(string $buffer);
+    public static function input(string $buffer, int $fd, \swoole_server $server);
 
     /**
      * encode.
@@ -20,13 +20,13 @@ interface ProtocolInterface
      * @param string  $payload
      * @return string
      */
-    public static function encode(string $payload);
-    
+    public static function encode(string $payload, int $fd, \swoole_server $server);
+
     /**
      * decode.
      *
      * @param string   $buffer
      * @return string
      */
-    public static function decode(string $buffer);
+    public static function decode(string $buffer, int $fd, \swoole_server $server);
 }
