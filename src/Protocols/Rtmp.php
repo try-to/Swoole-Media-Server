@@ -10,44 +10,20 @@ use TrytoMediaServer\Protocols\Rtmp\RtmpStream;
 /**
  * rtmp protocol
  */
-class Rtmp implements ProtocolInterface
+class Rtmp
 {
 
-    private static $handshakeFds = array();
+    public $prevReadingPacket = array();
 
-    private static $prevReadingPacket = array();
+    public $chunkSizeR = 128, $chunkSizeW = 128;
 
-    private static $chunkSizeR = 128, $chunkSizeW = 128;
+    public $operations = array();
 
-    private static $operations = array();
+    public $handshakeState = 0;
 
-    public static $handshakeState = 0;
-
-    public static $c0 = 0;
-    public static $c1 = 0;
-    public static $c2 = 0;
-
-    /**
-     * Check the integrity of the package.
-     *
-     * @param string  $buffer
-     * @return int
-     */
-    public static function input($buffer, $fd, $server)
-    {
-        return $buffer;
-    }
-
-    /**
-     * encode.
-     *
-     * @param string  $payload
-     * @return string
-     */
-    public static function encode($payload, $fd, $server)
-    {
-        return $payload;
-    }
+    public $c0 = 0;
+    public $c1 = 0;
+    public $c2 = 0;
 
     /**
      * decode.
@@ -55,17 +31,11 @@ class Rtmp implements ProtocolInterface
      * @param string   $buffer
      * @return string
      */
-    public static function decode($buffer, $fd, $server)
+    public function decode($buffer, $fd, $server)
     {
-        if(!in_array($fd,self::$handshakeFds)){
-            self::$handshakeState = 0;
-            self::$c0 = 0;
-            self::$c1 = 0;
-            self::$c2 = 0;
-        }
         // if (self::$handshakeState != 2) {
         // RTMP 握手验证
-        self::handshake($buffer, $fd, $server);
+        $this->handshake($buffer, $fd, $server);
         // return false;
         // }
 
@@ -81,19 +51,19 @@ class Rtmp implements ProtocolInterface
     /**
      * RTMP 握手验证
      */
-    private static function handshake($buffer, $fd, $server)
+    private function handshake($buffer, $fd, $server)
     {
-        switch (self::$handshakeState) {
+        switch ($this->handshakeState) {
             case RtmpPacket::RTMP_HANDSHAKE_0:
-                if ((strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) && !self::$c0 && !self::$c1) {
-                    self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-                    self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
-                } elseif (strlen($buffer) == 1 && !self::$c0) {
-                    self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-                } elseif (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE && !self::$c1) {
-                    self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
+                if ((strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) && !$this->c0 && !$this->c1) {
+                    $this->c0 = $this->readBuffer($buffer, 0, 1)->readTinyInt();
+                    $this->c1 = $this->readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
+                } elseif (strlen($buffer) == 1 && !$this->c0) {
+                    $this->c0 = $this->readBuffer($buffer, 0, 1)->readTinyInt();
+                } elseif (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE && !$this->c1) {
+                    $this->c1 = $this->readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
                 }
-                if (self::$c0 && self::$c1) {
+                if ($this->c0 && $this->c1) {
                     // 收到c0 c1 发送s0 s1 s2
                     $stream = new RtmpStream();
                     $stream->writeByte(3); // 当前RTMP协议的版本为 3
@@ -111,55 +81,55 @@ class Rtmp implements ProtocolInterface
 
                     // s2
                     $stream = new RtmpStream();
-                    $stream->writeInt32(self::$c1->readInt32());
-                    self::$c1->readInt32();
+                    $stream->writeInt32($this->c1->readInt32());
+                    $this->c1->readInt32();
                     $stream->writeInt32($ctime);
-                    $raw = self::$c1->readRaw();
+                    $raw = $this->c1->readRaw();
                     $stream->write($raw);
                     $server->send($fd, $stream->dump());
 
-                    self::$handshakeState = RtmpPacket::RTMP_HANDSHAKE_1;
+                    $this->handshakeState = RtmpPacket::RTMP_HANDSHAKE_1;
                 }
                 break;
             case RtmpPacket::RTMP_HANDSHAKE_1:
                 // 收到c2
-                self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
-                if (!empty(self::$c2)) {
-                    self::$handshakeState = RtmpPacket::RTMP_HANDSHAKE_2;
+                $this->c2 = $this->readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+                if (!empty($this->c2)) {
+                    $this->handshakeState = RtmpPacket::RTMP_HANDSHAKE_2;
                 }
-                self::$c0 = 0;
-                self::$c1 = 0;
+                $this->c0 = 0;
+                $this->c1 = 0;
                 break;
             case RtmpPacket::RTMP_HANDSHAKE_2:
             default:
-                self::$handshakeFds[] = $fd;
-                self::rtmpChunkRead($buffer, $fd, $server);
+                $this->handshakeFds[] = $fd;
+                $this->rtmpChunkRead($buffer, $fd, $server);
                 break;
         }
         return false;
     }
 
-    private static function rtmpChunkRead($buffer, $fd, $server)
+    private function rtmpChunkRead($buffer, $fd, $server)
     {
-        echo 'handshake:' . self::$handshakeState . PHP_EOL;
+        echo 'handshake:' . $this->handshakeState . PHP_EOL;
         echo PHP_EOL . 'packet:' . PHP_EOL;
         var_dump($buffer);
     }
 
-    private static function readPacket($buffer)
+    private function readPacket($buffer)
     {
         $packet = new RtmpPacket();
-        $header = self::readBuffer($buffer, 0, 1)->readTinyInt();
+        $header = $this->readBuffer($buffer, 0, 1)->readTinyInt();
 
         $packet->chunkType = (($header & 0xc0) >> 6);
         $packet->chunkStreamId = $header & 0x3f;
 
         switch ($packet->chunkStreamId) {
             case 0: //range of 64-319, second byte + 64
-                $packet->chunkStreamId = 64 + self::readBuffer($buffer, 0, 1)->readTinyInt();
+                $packet->chunkStreamId = 64 + $this->readBuffer($buffer, 0, 1)->readTinyInt();
                 break;
             case 1: //range of 64-65599,thrid byte * 256 + second byte + 64
-                $packet->chunkStreamId = 64 + self::readBuffer($buffer, 0, 1)->readTinyInt() + self::readBuffer($buffer, 0, 1)->readTinyInt() * 256;
+                $packet->chunkStreamId = 64 + $this->readBuffer($buffer, 0, 1)->readTinyInt() + $this->readBuffer($buffer, 0, 1)->readTinyInt() * 256;
                 break;
             case 2:
                 break;
@@ -169,44 +139,44 @@ class Rtmp implements ProtocolInterface
 
         switch ($packet->chunkType) {
             case RtmpPacket::CHUNK_TYPE_3:
-                $packet->timestamp = self::$prevReadingPacket[$packet->chunkStreamId]->timestamp;
+                $packet->timestamp = $this->prevReadingPacket[$packet->chunkStreamId]->timestamp;
             // no break
             case RtmpPacket::CHUNK_TYPE_2:
-                $packet->length = self::$prevReadingPacket[$packet->chunkStreamId]->length;
-                $packet->type = self::$prevReadingPacket[$packet->chunkStreamId]->type;
+                $packet->length = $this->prevReadingPacket[$packet->chunkStreamId]->length;
+                $packet->type = $this->prevReadingPacket[$packet->chunkStreamId]->type;
             // no break
             case RtmpPacket::CHUNK_TYPE_1:
-                $packet->streamId = self::$prevReadingPacket[$packet->chunkStreamId]->streamId;
+                $packet->streamId = $this->prevReadingPacket[$packet->chunkStreamId]->streamId;
             // no break
             case RtmpPacket::CHUNK_TYPE_0:
                 break;
         }
 
-        self::$prevReadingPacket[$packet->chunkStreamId] = $packet;
+        $this->prevReadingPacket[$packet->chunkStreamId] = $packet;
         $headerSize = RtmpPacket::$SIZES[$packet->chunkType];
 
         if ($headerSize == RtmpPacket::MAX_HEADER_SIZE) {
             $packet->hasAbsTimestamp = true;
         }
 
-        if (!isset(self::$operations[$packet->chunkStreamId])) {
-            self::$operations[$packet->chunkStreamId] = new RtmpOperation();
+        if (!isset($this->operations[$packet->chunkStreamId])) {
+            $this->operations[$packet->chunkStreamId] = new RtmpOperation();
         }
 
-        if (self::$operations[$packet->chunkStreamId]->getResponse()) {
+        if ($this->operations[$packet->chunkStreamId]->getResponse()) {
             //Operation chunking....
-            $packet = self::$operations[$packet->chunkStreamId]->getResponse()->getPacket();
+            $packet = $this->operations[$packet->chunkStreamId]->getResponse()->getPacket();
             $headerSize = 0; //no header
         } else {
             //Create response from packet
-            self::$operations[$packet->chunkStreamId]->createResponse($packet);
+            $this->operations[$packet->chunkStreamId]->createResponse($packet);
         }
 
         $headerSize--;
         $header;
 
         if ($headerSize > 0) {
-            $header = self::readBuffer($buffer, 0, $headerSize);
+            $header = $this->readBuffer($buffer, 0, $headerSize);
         }
 
         if ($headerSize >= 3) {
@@ -228,7 +198,7 @@ class Rtmp implements ProtocolInterface
         }
 
         $nToRead = $packet->length - $packet->bytesRead;
-        $nChunk = self::$chunkSizeR;
+        $nChunk = $this->chunkSizeR;
         if ($nToRead < $nChunk) {
             $nChunk = $nToRead;
         }
@@ -240,7 +210,7 @@ class Rtmp implements ProtocolInterface
         return null;
     }
 
-    private static function readBuffer($buffer, $index = 0, $length = 1)
+    private function readBuffer($buffer, $index = 0, $length = 1)
     {
         return new RtmpStream(substr($buffer, $index, $length));
     }

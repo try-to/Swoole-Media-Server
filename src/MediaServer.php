@@ -21,6 +21,8 @@ class MediaServer extends BaseServer
     public $options;
     public $pid_file = null;
 
+    public $clients = [];
+
     public function init()
     {
         if (!empty(tryto_env('server.log_file'))) {
@@ -46,6 +48,7 @@ class MediaServer extends BaseServer
     public function onConnect(\swoole_server $server, int $fd)
     {
         echo 'Connect fd:' . $fd . PHP_EOL;
+        $this->clients[$fd] = new Rtmp();
     }
 
     /**
@@ -60,8 +63,7 @@ class MediaServer extends BaseServer
     public function onReceive(\swoole_server $server, int $fd, int $reactor_id, string $data)
     {
         // echo 'Receive fd:' . $fd . ' data:'. $data . PHP_EOL;
-        Rtmp::decode($data, $fd, $server);
-
+        $this->clients[$fd]->decode($data, $fd, $server);
     }
 
     /**
@@ -85,6 +87,9 @@ class MediaServer extends BaseServer
     public function onClose(\swoole_server $server, int $fd)
     {
         echo 'Close fd:' . $fd . PHP_EOL;
+        if(isset($this->clients[$fd])){
+            unset($this->clients[$fd]);
+        }
         parent::onClose($server, $fd);
     }
 }
