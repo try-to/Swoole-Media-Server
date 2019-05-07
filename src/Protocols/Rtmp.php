@@ -94,7 +94,7 @@ class Rtmp implements ProtocolInterface
         }
 
         if (self::$c0c1) {
-            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
 
             // 发送S2
             // $stream = new RtmpStream();
