@@ -48,7 +48,7 @@ class MediaServer extends BaseServer
     public function onConnect(\swoole_server $server, int $fd)
     {
         echo 'Connect fd:' . $fd . PHP_EOL;
-        $this->clients[$fd] = new Rtmp();
+        $this->clients[$fd] = new Rtmp($fd,$server);
     }
 
     /**

@@ -21,9 +21,23 @@ class Rtmp
 
     public $handshakeState = 0;
 
+    public $fd = null;
+
+    public $server = null;
+
     public $c0 = 0;
     public $c1 = 0;
     public $c2 = 0;
+
+    public function __construct(int $fd,\swoole_server $server)
+    {
+        $this->fd = $fd;
+        $this->server = $server;
+        $this->handshakeState = 0;
+        $this->c0 = 0;
+        $this->c1 = 0;
+        $this->c2 = 0;
+    }
 
     /**
      * decode.
@@ -31,28 +45,9 @@ class Rtmp
      * @param string   $buffer
      * @return string
      */
-    public function decode($buffer, $fd, $server)
+    public function decode($buffer)
     {
-        // if (self::$handshakeState != 2) {
         // RTMP 握手验证
-        $this->handshake($buffer, $fd, $server);
-        // return false;
-        // }
-
-        // if (self::$handshakeState == 2) {
-        //     echo 'handshake:' . self::$handshakeState . PHP_EOL;
-        //     echo PHP_EOL . 'packet:' . PHP_EOL;
-        //     var_dump($buffer);
-        // }
-
-        return $buffer;
-    }
-
-    /**
-     * RTMP 握手验证
-     */
-    private function handshake($buffer, $fd, $server)
-    {
         switch ($this->handshakeState) {
             case RtmpPacket::RTMP_HANDSHAKE_0:
                 if ((strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) && !$this->c0 && !$this->c1) {
@@ -67,7 +62,7 @@ class Rtmp
                     // 收到c0 c1 发送s0 s1 s2
                     $stream = new RtmpStream();
                     $stream->writeByte(3); // 当前RTMP协议的版本为 3
-                    $server->send($fd, $stream->dump());
+                    $this->server->send($this->fd, $stream->dump());
 
                     // s1
                     $stream = new RtmpStream();
@@ -77,7 +72,7 @@ class Rtmp
                     for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
                         $stream->writeByte(rand(0, 256));
                     }
-                    $server->send($fd, $stream->dump());
+                    $this->server->send($this->fd, $stream->dump());
 
                     // s2
                     $stream = new RtmpStream();
@@ -86,7 +81,7 @@ class Rtmp
                     $stream->writeInt32($ctime);
                     $raw = $this->c1->readRaw();
                     $stream->write($raw);
-                    $server->send($fd, $stream->dump());
+                    $this->server->send($this->fd, $stream->dump());
 
                     $this->handshakeState = RtmpPacket::RTMP_HANDSHAKE_1;
                 }
@@ -102,14 +97,14 @@ class Rtmp
                 break;
             case RtmpPacket::RTMP_HANDSHAKE_2:
             default:
-                $this->handshakeFds[] = $fd;
-                $this->rtmpChunkRead($buffer, $fd, $server);
+                $this->rtmpChunkRead($buffer);
                 break;
         }
         return false;
     }
 
-    private function rtmpChunkRead($buffer, $fd, $server)
+
+    private function rtmpChunkRead($buffer)
     {
         echo 'handshake:' . $this->handshakeState . PHP_EOL;
         echo PHP_EOL . 'packet:' . PHP_EOL;
