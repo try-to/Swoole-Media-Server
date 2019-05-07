@@ -64,7 +64,7 @@ class Rtmp implements ProtocolInterface
         if (self::$handshake == 0) {
             if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
             } else if (strlen($buffer) == 1) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
             } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
@@ -79,6 +79,7 @@ class Rtmp implements ProtocolInterface
             $stream->writeByte(3); // 当前RTMP协议的版本为 3
             $server->send($fd, $stream->dump());
 
+            // s1
             $stream = new RtmpStream();
             $ctime = time();
             $stream->writeInt32($ctime); //Time 4
@@ -88,6 +89,7 @@ class Rtmp implements ProtocolInterface
             }
             $server->send($fd, $stream->dump());
 
+            // s2
             $stream = new RtmpStream();
             $stream->writeInt32(self::$c1->readInt32());
 		    self::$c1->readInt32();
