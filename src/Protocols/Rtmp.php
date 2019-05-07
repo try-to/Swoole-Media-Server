@@ -63,11 +63,11 @@ class Rtmp implements ProtocolInterface
         if (!self::$c0c1) {
             if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
+                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
             } else if (strlen($buffer) == 1) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
             } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
-                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
+                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
             }
         }
 
@@ -93,7 +93,7 @@ class Rtmp implements ProtocolInterface
         }
 
         if (self::$c0c1) {
-            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
+            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
 
             // 发送S2
             // $stream = new RtmpStream();
