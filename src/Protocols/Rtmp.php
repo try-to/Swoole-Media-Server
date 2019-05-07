@@ -63,9 +63,10 @@ class Rtmp implements ProtocolInterface
         // $c1 = self::readBuffer($buffer, 1536);
         // $packet = self::readPacket($buffer);
 
-        var_dump('C0' . $c0 . PHP_EOL);
-
-        var_dump('C1' . $c1 . PHP_EOL);
+        echo 'C0'.PHP_EOL;
+        var_dump($c0);
+        echo PHP_EOL.'C1'.PHP_EOL;
+        var_dump($c1);
 
         return $buffer;
     }
