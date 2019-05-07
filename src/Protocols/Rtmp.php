@@ -63,9 +63,9 @@ class Rtmp implements ProtocolInterface
         // $c1 = self::readBuffer($buffer, 1536);
         // $packet = self::readPacket($buffer);
 
-        echo 'RSESS: Received C0 Handshake' . $c0 . PHP_EOL;
+        var_dump('C0' . $c0 . PHP_EOL);
 
-        echo 'RSESS: Received C1 Handshake' . $c1 . PHP_EOL;
+        var_dump('C1' . $c1 . PHP_EOL);
 
         return $buffer;
     }
