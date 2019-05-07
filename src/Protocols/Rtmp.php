@@ -55,11 +55,11 @@ class Rtmp implements ProtocolInterface
      */
     public static function decode($buffer)
     {
-        $stream = new RtmpStream();
+        // $stream = new RtmpStream();
 
-        $c1 = self::readBuffer($buffer, 1536);
+        // $c1 = self::readBuffer($buffer, 1536);
         // $packet = self::readPacket($buffer);
-        var_dump($c1);
+        var_dump($buffer);
 
         return $buffer;
     }
