@@ -3,9 +3,9 @@
 namespace TrytoMediaServer\Protocols;
 
 use TrytoMediaServer\Protocols\ProtocolInterface;
+use TrytoMediaServer\Protocols\Rtmp\RtmpOperation;
 use TrytoMediaServer\Protocols\Rtmp\RtmpPacket;
 use TrytoMediaServer\Protocols\Rtmp\RtmpStream;
-use TrytoMediaServer\Protocols\Rtmp\RtmpOperation;
 
 /**
  * rtmp protocol
@@ -25,7 +25,8 @@ class Rtmp implements ProtocolInterface
 
     private static $operations = array();
 
-    private static $handshake = 0;
+    private static $handshakeState = 0;
+
     private static $c0 = 0;
     private static $c1 = 0;
     private static $c2 = 0;
@@ -60,65 +61,125 @@ class Rtmp implements ProtocolInterface
      */
     public static function decode($buffer, $fd, $server)
     {
-        // $stream = new RtmpStream();
-        if (self::$handshake == 0) {
-            if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
-                self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
-            } else if (strlen($buffer) == 1) {
-                self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-            } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
-                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
-            }
-            echo 'handshake:' . self::$handshake . PHP_EOL;
-        }
+        // if (self::$handshakeState != 2) {
+        // RTMP 握手验证
+        self::handshake($buffer, $fd, $server);
+        // return false;
+        // }
 
-        if (self::$c0 && self::$c1 && self::$handshake == 0) {
-            // 收到c0 c1 发送s0 s1 s2
-            $stream = new RtmpStream();
-            $stream->writeByte(3); // 当前RTMP协议的版本为 3
-            $server->send($fd, $stream->dump());
-
-            // s1
-            $stream = new RtmpStream();
-            $ctime = time();
-            $stream->writeInt32($ctime); //Time 4
-            $stream->writeInt32(0); // zero 4
-            for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
-                $stream->writeByte(rand(0, 256));
-            }
-            $server->send($fd, $stream->dump());
-
-            // s2
-            $stream = new RtmpStream();
-            $stream->writeInt32(self::$c1->readInt32());
-		    self::$c1->readInt32();
-            $stream->writeInt32($ctime);
-            $raw = self::$c1->readRaw();
-            $stream->write($raw);
-            $server->send($fd, $stream->dump());
-
-            self::$handshake = 1;
-        }
-
-        if (self::$handshake == 1) {
-            // 收到c2
-            echo 'handshake:' . self::$handshake . PHP_EOL;
-            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->dump();
-            if(!empty(self::$c2)){
-                // 发送S2
-                // $server->send($fd, self::$c1);
-                self::$handshake = 2;
-            }
-        }
-
-        if (self::$handshake == 2) {
-            echo 'handshake:' . self::$handshake . PHP_EOL;
-            echo PHP_EOL.'packet:'. PHP_EOL;
-            var_dump($buffer);
-        }
+        // if (self::$handshakeState == 2) {
+        //     echo 'handshake:' . self::$handshakeState . PHP_EOL;
+        //     echo PHP_EOL . 'packet:' . PHP_EOL;
+        //     var_dump($buffer);
+        // }
 
         return $buffer;
+    }
+
+    /**
+     * RTMP 握手验证
+     */
+    private static function handshake($buffer, $fd, $server)
+    {
+        switch (self::$handshakeState) {
+            case RtmpPacket::RTMP_HANDSHAKE_0:
+                if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
+                    self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
+                    self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
+                } elseif (strlen($buffer) == 1) {
+                    self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
+                } elseif (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
+                    self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
+                }
+                if (self::$c0 && self::$c1) {
+                    // 收到c0 c1 发送s0 s1 s2
+                    $stream = new RtmpStream();
+                    $stream->writeByte(3); // 当前RTMP协议的版本为 3
+                    $server->send($fd, $stream->dump());
+
+                    // s1
+                    $stream = new RtmpStream();
+                    $ctime = time();
+                    $stream->writeInt32($ctime); //Time 4
+                    $stream->writeInt32(0); // zero 4
+                    for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
+                        $stream->writeByte(rand(0, 256));
+                    }
+                    $server->send($fd, $stream->dump());
+
+                    // s2
+                    $stream = new RtmpStream();
+                    $stream->writeInt32(self::$c1->readInt32());
+                    self::$c1->readInt32();
+                    $stream->writeInt32($ctime);
+                    $raw = self::$c1->readRaw();
+                    $stream->write($raw);
+                    $server->send($fd, $stream->dump());
+
+                    self::$handshakeState = RTMP_HANDSHAKE_1;
+                }
+                break;
+            case RtmpPacket::RTMP_HANDSHAKE_1:
+                // 收到c2
+                self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+                if (!empty(self::$c2)) {
+                    self::$handshakeState = RTMP_HANDSHAKE_2;
+                }
+                break;
+            case RtmpPacket::RTMP_HANDSHAKE_2:
+            default:
+                self::rtmpChunkRead($buffer, $fd, $server);
+                break;
+        }
+        // if (self::$handshakeState == 0) {
+
+        //     echo 'handshake:' . self::$handshakeState . PHP_EOL;
+        // }
+
+        // if (self::$c0 && self::$c1 && self::$handshakeState == 0) {
+        //     // 收到c0 c1 发送s0 s1 s2
+        //     $stream = new RtmpStream();
+        //     $stream->writeByte(3); // 当前RTMP协议的版本为 3
+        //     $server->send($fd, $stream->dump());
+
+        //     // s1
+        //     $stream = new RtmpStream();
+        //     $ctime = time();
+        //     $stream->writeInt32($ctime); //Time 4
+        //     $stream->writeInt32(0); // zero 4
+        //     for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
+        //         $stream->writeByte(rand(0, 256));
+        //     }
+        //     $server->send($fd, $stream->dump());
+
+        //     // s2
+        //     $stream = new RtmpStream();
+        //     $stream->writeInt32(self::$c1->readInt32());
+        //     self::$c1->readInt32();
+        //     $stream->writeInt32($ctime);
+        //     $raw = self::$c1->readRaw();
+        //     $stream->write($raw);
+        //     $server->send($fd, $stream->dump());
+
+        //     self::$handshakeState = 1;
+        // }
+
+        // if (self::$handshakeState == 1) {
+        //     // 收到c2
+        //     echo 'handshake:' . self::$handshakeState . PHP_EOL;
+        //     self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+        //     if (!empty(self::$c2)) {
+        //         self::$handshakeState = 2;
+        //     }
+        // }
+        return false;
+    }
+
+    private static function rtmpChunkRead($buffer, $fd, $server)
+    {
+        echo 'handshake:' . self::$handshakeState . PHP_EOL;
+        echo PHP_EOL . 'packet:' . PHP_EOL;
+        var_dump($buffer);
     }
 
     private static function readPacket($buffer)
