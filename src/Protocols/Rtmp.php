@@ -64,11 +64,11 @@ class Rtmp implements ProtocolInterface
         if (self::$handshake == 0) {
             if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
-                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+                self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE)->dump();
             } else if (strlen($buffer) == 1) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
             } else if (strlen($buffer) == RtmpPacket::RTMP_SIG_SIZE) {
-                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+                self::$c1 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->dump();
             }
             echo 'handshake:' . self::$handshake . PHP_EOL;
         }
@@ -89,19 +89,20 @@ class Rtmp implements ProtocolInterface
         }
 
         if (self::$handshake == 1) {
+            // 收到c2
             self::$handshake = 2;
             echo 'handshake:' . self::$handshake . PHP_EOL;
-            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readInt32();
-
-            // 发送S2
-            $server->send($fd, self::$c1);
-            self::$handshake = 2;
+            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->dump();
+            if(!empty(self::$c2)){
+                // 发送S2
+                $server->send($fd, self::$c1);
+                self::$handshake = 2;
+            }
         }
 
         if (self::$handshake == 2) {
             echo 'packet:'. PHP_EOL;
-            $packet = self::readPacket($buffer);
-            var_dump($packet);
+            var_dump($buffer);
         }
 
         return $buffer;
