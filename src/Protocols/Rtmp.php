@@ -93,14 +93,7 @@ class Rtmp implements ProtocolInterface
             self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readInt32();
 
             // 发送S2
-            $stream = new RtmpStream();
-            $ctime = time();
-            $stream->writeInt32($ctime); //Time 4
-            $stream->writeInt32(self::$c2); //Time 4
-            for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
-                $stream->writeByte(rand(0, 256));
-            }
-            $server->send($fd, $stream->dump());
+            $server->send($fd, self::$c1);
             self::$handshake = 2;
         }
 
