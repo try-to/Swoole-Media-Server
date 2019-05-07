@@ -60,7 +60,7 @@ class Rtmp implements ProtocolInterface
     public static function decode($buffer, $fd, $server)
     {
         // $stream = new RtmpStream();
-        if (!self::$c0 || !self::$c1) {
+        if (!self::$c0c1) {
             if (strlen($buffer) == (RtmpPacket::RTMP_SIG_SIZE + 1)) {
                 self::$c0 = self::readBuffer($buffer, 0, 1)->readTinyInt();
                 self::$c1 = self::readBuffer($buffer, 1, RtmpPacket::RTMP_SIG_SIZE);
@@ -79,11 +79,11 @@ class Rtmp implements ProtocolInterface
             // 收到c0 c1 发送s0 s1
             if ($server->exist($fd)) {
                 $stream = new RtmpStream();
-                $stream->writeByte(3);
+                $stream->writeByte(3); // 当前RTMP协议的版本为 3
                 $ctime = time();
                 $stream->writeInt32($ctime); //Time 4
                 $stream->writeInt32(0); // zero 4
-                for ($i = 0; $i < 1536 - 8; $i++) {
+                for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
                     $stream->writeByte(rand(0, 256));
                 }
                 $server->send($fd, $stream->dump());
@@ -94,7 +94,14 @@ class Rtmp implements ProtocolInterface
         }
 
         if (self::$c0c1) {
-            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE);
+            self::$c2 = self::readBuffer($buffer, 0, RtmpPacket::RTMP_SIG_SIZE)->readRaw();
+
+            // 发送S2
+            // $stream = new RtmpStream();
+            // $ctime = time();
+            // $stream->writeInt32($ctime); //Time 4
+
+            // $server->send($fd, $stream->dump());
             echo 'C2' . PHP_EOL;
             var_dump(self::$c2);
         }
