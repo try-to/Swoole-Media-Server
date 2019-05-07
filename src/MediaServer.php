@@ -10,8 +10,6 @@ use function TrytoMediaServer\Helper\mk_dir;
 use function TrytoMediaServer\Helper\tryto_env;
 use function TrytoMediaServer\Helper\tryto_error;
 use TrytoMediaServer\Protocols\Rtmp;
-use TrytoMediaServer\Protocols\Rtmp\RtmpStream;
-use TrytoMediaServer\Protocols\Rtmp\RtmpPacket;
 
 class MediaServer extends BaseServer
 {
@@ -62,17 +60,7 @@ class MediaServer extends BaseServer
     public function onReceive(\swoole_server $server, int $fd, int $reactor_id, string $data)
     {
         // echo 'Receive fd:' . $fd . ' data:'. $data . PHP_EOL;
-
-        $packet = new RtmpPacket();
-        $demo = new RtmpStream($data[0]);
-        $header = $demo->readTinyInt();
-
-        $packet->chunkType = (($header & 0xc0) >> 6);
-		$packet->chunkStreamId = $header & 0x3f;
-
-        var_dump($packet->chunkType);
-        var_dump($packet->chunkStreamId);
-        // Rtmp::decode($data);
+        Rtmp::decode($data);
     
     }
 
