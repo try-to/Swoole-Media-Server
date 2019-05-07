@@ -5,6 +5,7 @@ namespace TrytoMediaServer\Protocols;
 use TrytoMediaServer\Protocols\ProtocolInterface;
 use TrytoMediaServer\Protocols\Rtmp\RtmpPacket;
 use TrytoMediaServer\Protocols\Rtmp\RtmpStream;
+use TrytoMediaServer\Protocols\Rtmp\RtmpOperation;
 
 /**
  * rtmp protocol
