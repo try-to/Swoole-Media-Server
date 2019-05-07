@@ -81,9 +81,6 @@ class Rtmp implements ProtocolInterface
 
                 $stream = new RtmpStream();
                 $stream->writeByte(3); // 当前RTMP协议的版本为 3
-                $server->send($fd, $stream->dump());
-
-                $stream = new RtmpStream();
                 $ctime = time();
                 $stream->writeInt32($ctime); //Time 4
                 $stream->writeInt32(0); // zero 4
