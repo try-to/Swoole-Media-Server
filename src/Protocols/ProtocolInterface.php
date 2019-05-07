@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace TrytoMediaServer\Interfaces;
+namespace TrytoMediaServer\Protocols;
 
 interface ProtocolInterface
 {

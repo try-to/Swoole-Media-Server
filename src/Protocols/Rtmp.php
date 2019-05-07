@@ -2,8 +2,6 @@
 
 namespace TrytoMediaServer\Protocols;
 
-use TrytoMediaServer\Interfaces\ProtocolInterface;
-
 /**
  * rtmp protocol
  */
