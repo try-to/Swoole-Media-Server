@@ -2,7 +2,7 @@
 
 namespace TrytoMediaServer\Protocols;
 
-use TrytoMediaServer\Protocols\ProtocolInterface;
+use TrytoMediaServer\Protocols\Rtmp\RtmpMessage;
 use TrytoMediaServer\Protocols\Rtmp\RtmpOperation;
 use TrytoMediaServer\Protocols\Rtmp\RtmpPacket;
 use TrytoMediaServer\Protocols\Rtmp\RtmpStream;
@@ -29,14 +29,14 @@ class Rtmp
     public $c1 = 0;
     public $c2 = 0;
 
-    public function __construct(int $fd,\swoole_server $server)
+    public function __construct(int $fd, \swoole_server $server)
     {
-        $this->fd = $fd;
-        $this->server = $server;
+        $this->fd             = $fd;
+        $this->server         = $server;
         $this->handshakeState = 0;
-        $this->c0 = 0;
-        $this->c1 = 0;
-        $this->c2 = 0;
+        $this->c0             = 0;
+        $this->c1             = 0;
+        $this->c2             = 0;
     }
 
     /**
@@ -66,7 +66,7 @@ class Rtmp
 
                     // s1
                     $stream = new RtmpStream();
-                    $ctime = time();
+                    $ctime  = time();
                     $stream->writeInt32($ctime); //Time 4
                     $stream->writeInt32(0); // zero 4
                     for ($i = 0; $i < RtmpPacket::RTMP_SIG_SIZE - 8; $i++) {
@@ -96,19 +96,19 @@ class Rtmp
                 $this->c1 = 0;
                 break;
             case RtmpPacket::RTMP_HANDSHAKE_2:
-                $this->rtmpChunkRead($buffer);
-                break;
             default:
+                $this->rtmpChunkRead($buffer);
                 break;
         }
         return false;
     }
 
-
     private function rtmpChunkRead($buffer)
     {
-        echo 'packet:' . PHP_EOL;
-        var_dump($buffer);
+        echo PHP_EOL . 'packet:' . PHP_EOL;
+        var_dump($this->readPacket($buffer));
+        echo PHP_EOL . 'packet1:' . PHP_EOL;
+        var_dump((new RtmpMessage())->decode($this->readPacket($buffer)));
     }
 
     private function readPacket($buffer)
@@ -116,7 +116,7 @@ class Rtmp
         $packet = new RtmpPacket();
         $header = $this->readBuffer($buffer, 0, 1)->readTinyInt();
 
-        $packet->chunkType = (($header & 0xc0) >> 6);
+        $packet->chunkType     = (($header & 0xc0) >> 6);
         $packet->chunkStreamId = $header & 0x3f;
 
         switch ($packet->chunkStreamId) {
@@ -138,7 +138,7 @@ class Rtmp
             // no break
             case RtmpPacket::CHUNK_TYPE_2:
                 $packet->length = $this->prevReadingPacket[$packet->chunkStreamId]->length;
-                $packet->type = $this->prevReadingPacket[$packet->chunkStreamId]->type;
+                $packet->type   = $this->prevReadingPacket[$packet->chunkStreamId]->type;
             // no break
             case RtmpPacket::CHUNK_TYPE_1:
                 $packet->streamId = $this->prevReadingPacket[$packet->chunkStreamId]->streamId;
@@ -148,7 +148,7 @@ class Rtmp
         }
 
         $this->prevReadingPacket[$packet->chunkStreamId] = $packet;
-        $headerSize = RtmpPacket::$SIZES[$packet->chunkType];
+        $headerSize                                      = RtmpPacket::$SIZES[$packet->chunkType];
 
         if ($headerSize == RtmpPacket::MAX_HEADER_SIZE) {
             $packet->hasAbsTimestamp = true;
@@ -160,7 +160,7 @@ class Rtmp
 
         if ($this->operations[$packet->chunkStreamId]->getResponse()) {
             //Operation chunking....
-            $packet = $this->operations[$packet->chunkStreamId]->getResponse()->getPacket();
+            $packet     = $this->operations[$packet->chunkStreamId]->getResponse()->getPacket();
             $headerSize = 0; //no header
         } else {
             //Create response from packet
@@ -193,7 +193,7 @@ class Rtmp
         }
 
         $nToRead = $packet->length - $packet->bytesRead;
-        $nChunk = $this->chunkSizeR;
+        $nChunk  = $this->chunkSizeR;
         if ($nToRead < $nChunk) {
             $nChunk = $nToRead;
         }
