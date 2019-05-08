@@ -96,8 +96,9 @@ class Rtmp
                 $this->c1 = 0;
                 break;
             case RtmpPacket::RTMP_HANDSHAKE_2:
-            default:
                 $this->rtmpChunkRead($buffer);
+                break;
+            default:
                 break;
         }
         return false;

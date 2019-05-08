@@ -34,6 +34,72 @@ function replace_constant(string &$const, string $default = '')
 }
 
 /**
+ * 获取服务类型
+ *  SWOOLE_BASE 使用Base模式，业务代码在Reactor进程中直接执行
+    SWOOLE_PROCESS 使用进程模式，业务代码在Worker进程中执行
+ * @param string $sock_type
+ */
+function get_mode($mode)
+{
+    $type = '';
+    switch ($mode) {
+        case SWOOLE_BASE:
+            $type = 'Base模式';
+            break;
+        case SWOOLE_PROCESS:
+            $type = '进程模式';
+            break;
+            break;
+        default:
+            $type = 'none';
+            break;
+    }
+    return $type;
+}
+
+/**
+ * 获取服务类型
+    SWOOLE_SOCK_TCP 创建tcp socket
+    SWOOLE_SOCK_TCP6 创建tcp ipv6 socket
+    SWOOLE_SOCK_UDP 创建udp socket
+    SWOOLE_SOCK_UDP6 创建udp ipv6 socket
+    SWOOLE_SOCK_UNIX_DGRAM 创建unix dgram socket
+    SWOOLE_SOCK_UNIX_STREAM 创建unix stream socket
+    SWOOLE_SOCK_SYNC 同步客户端
+    SWOOLE_SOCK_ASYNC 异步客户端
+ *
+ * @param string $sock_type
+ */
+function get_sock_type($sock_type)
+{
+    $type = '';
+    switch ($sock_type) {
+        case SWOOLE_SOCK_TCP:
+            $type = 'tcp';
+            break;
+        case SWOOLE_SOCK_TCP6:
+            $type = 'tcp ipv6';
+            break;
+        case SWOOLE_SOCK_UDP:
+            $type = 'udp';
+            break;
+        case SWOOLE_SOCK_UDP6:
+            $type = 'udp ipv6';
+            break;
+        case SWOOLE_SOCK_UNIX_DGRAM:
+            $type = 'dgram';
+            break;
+        case SWOOLE_SOCK_UNIX_STREAM:
+            $type = 'stream';
+            break;
+        default:
+            $type = 'none';
+            break;
+    }
+    return $type;
+}
+
+/**
  * 获取环境变量值
  * @access public
  * @param  string $name    环境变量名（支持二级 . 号分割）
@@ -77,8 +143,8 @@ function tryto_env($name, $default = null)
  */
 function tryto_error($message, $exitCode = 0)
 {
-    $parts = explode(':', $message, 2);
-    $parts[0] = strtoupper($parts[0]);
+    $parts        = explode(':', $message, 2);
+    $parts[0]     = strtoupper($parts[0]);
     $prefixExists = in_array($parts[0], [
         'ERROR', 'WARNING', 'NOTICE',
     ]);

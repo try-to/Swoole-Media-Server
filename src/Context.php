@@ -1,6 +1,7 @@
-<?php declare(strict_types=1);
+<?php declare (strict_types = 1);
 
 namespace TrytoMediaServer;
+
 /*
  * @Author: try-to w@tryto.cn
  * @Date: 2019-04-30
@@ -11,10 +12,11 @@ class Context
 {
     protected static $pool = [];
 
-    public static function cid():int {
+    public static function cid(): int
+    {
         return Coroutine::getuid();
     }
-    
+
     public static function get($key)
     {
         $cid = $cid ?? Coroutine::getuid();
@@ -35,7 +37,7 @@ class Context
         }
         return $item;
     }
-    
+
     public static function delete($key, int $cid = null)
     {
         $cid = $cid ?? Coroutine::getuid();
@@ -44,7 +46,8 @@ class Context
         }
     }
 
-    public static function destruct(int $cid = null) {
+    public static function destruct(int $cid = null)
+    {
         $cid = $cid ?? Coroutine::getuid();
         if ($cid > 0) {
             unset(self::$pool[$cid]);

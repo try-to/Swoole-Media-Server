@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare (strict_types = 1);
 
 namespace TrytoMediaServer;
 
@@ -41,7 +41,7 @@ class Base extends Context
      */
     protected static function writeErrorMessage($exception, string $tag = 'system')
     {
-        $errLevel = $exception ->getCode() ? array_search($exception ->getCode(), Log::$levels) : 'warning';
-        echo  '[' . ucfirst($errLevel) . '] ', $exception->errorMessage(), PHP_EOL;
+        $errLevel = $exception->getCode() ? array_search($exception->getCode(), Log::$levels) : 'warning';
+        echo '[' . ucfirst($errLevel) . '] ', $exception->errorMessage(), PHP_EOL;
     }
 }

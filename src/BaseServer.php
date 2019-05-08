@@ -6,6 +6,8 @@
  */
 namespace TrytoMediaServer;
 
+use function TrytoMediaServer\Helper\get_mode;
+use function TrytoMediaServer\Helper\get_sock_type;
 use function TrytoMediaServer\Helper\mk_dir;
 use function TrytoMediaServer\Helper\tryto_error;
 use TrytoMediaServer\Exceptions\BaseException;
@@ -15,12 +17,12 @@ class BaseServer extends Base
 {
     protected $server;
 
-    protected $host = '0.0.0.0';
-    protected $port = 9501;
-    protected $mode = null;
+    protected $host      = '0.0.0.0';
+    protected $port      = 9501;
+    protected $mode      = null;
     protected $sock_type = null;
-    protected $pid_file = null;
-    protected $options = [];
+    protected $pid_file  = null;
+    protected $options   = [];
 
     /**
      * __construct
@@ -30,7 +32,6 @@ class BaseServer extends Base
     {
         // 初始化
         $this->init();
-
         try {
 
             if (!empty($this->pid_file)) {
@@ -55,7 +56,8 @@ class BaseServer extends Base
             $this->server->on('ManagerStart', [$this, 'onManagerStart']);
             $result = $this->server->start();
             if ($result) {
-                tryto_error('WARNING: Server is shutdown!');
+                echo sprintf('server [%s:%s] %s', $this->host, $this->port, $this->sock_type);
+                echo PHP_EOL;
             } else {
                 tryto_error('ERROR: Server start failed!');
             }
@@ -124,6 +126,8 @@ class BaseServer extends Base
      */
     public function onStart(\swoole_server $server)
     {
+
+        echo sprintf('run server [ %s -> %s://%s:%s ] ok...' . PHP_EOL, get_mode($this->mode), get_sock_type($this->sock_type), $this->host, $this->port);
         @file_put_contents($this->pid_file, $server->master_pid . ',' . $server->manager_pid);
         ProcessHelper::setProcessTitle('TrytoMediaServer master  process');
     }
