@@ -30,12 +30,12 @@ class MediaServer extends BaseServer
         } else {
             tryto_error('ERROR:server.log_file is empty!');
         }
-        $this->host = tryto_env('server.host');
-        $this->port = intval(tryto_env('server.port'));
-        $this->mode = tryto_env('server.mode');
+        $this->host      = tryto_env('server.host');
+        $this->port      = intval(tryto_env('server.port'));
+        $this->mode      = tryto_env('server.mode');
         $this->sock_type = tryto_env('server.sock_type');
-        $this->options = tryto_env('server.options', []);
-        $this->pid_file = tryto_env('server.pid_file');
+        $this->options   = tryto_env('server.options', []);
+        $this->pid_file  = tryto_env('server.pid_file');
     }
 
     /**

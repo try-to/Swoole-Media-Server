@@ -20,10 +20,10 @@ class RtmpStream
     public function flush($length = -1)
     {
         if ($length == -1) {
-            $d = $this->_data;
+            $d           = $this->_data;
             $this->_data = "";
         } else {
-            $d = substr($this->_data, 0, $length);
+            $d           = substr($this->_data, 0, $length);
             $this->_data = substr($this->_data, $length);
         }
         $this->_index = 0;

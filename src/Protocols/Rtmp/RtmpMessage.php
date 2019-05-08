@@ -22,9 +22,9 @@ class RtmpMessage
 
     public function __construct($commandName = "", $commandObject = null, $arguments = null)
     {
-        $this->commandName = $commandName;
+        $this->commandName   = $commandName;
         $this->commandObject = $commandObject;
-        $this->arguments = $arguments;
+        $this->arguments     = $arguments;
 
     }
 
@@ -60,15 +60,15 @@ class RtmpMessage
         $p = new RtmpPacket();
         if ($this->commandName == "connect") {
             $this->transactionId = 1;
-            $amfVersion = 0; //Connect packet must be in AMF0
+            $amfVersion          = 0; //Connect packet must be in AMF0
         }
         $p->chunkStreamId = 3;
-        $p->streamId = 0;
-        $p->chunkType = RtmpPacket::CHUNK_TYPE_0;
-        $p->type = $amfVersion == 0 ? RtmpPacket::TYPE_INVOKE_AMF0 : RtmpPacket::TYPE_INVOKE_AMF3; //Invoke
+        $p->streamId      = 0;
+        $p->chunkType     = RtmpPacket::CHUNK_TYPE_0;
+        $p->type          = $amfVersion == 0 ? RtmpPacket::TYPE_INVOKE_AMF0 : RtmpPacket::TYPE_INVOKE_AMF3; //Invoke
 
         //Encoding payload
-        $stream = new SabreAMF_OutputStream();
+        $stream     = new SabreAMF_OutputStream();
         $serializer = new SabreAMF_AMF0_Serializer($stream);
         $serializer->writeAMFData($this->commandName);
         $serializer->writeAMFData($this->transactionId);
@@ -95,15 +95,15 @@ class RtmpMessage
     public function decode(RtmpPacket $p)
     {
         $this->packet = $p;
-        $amfVersion = $p->type == RtmpPacket::TYPE_INVOKE_AMF0 ? 0 : 3;
+        $amfVersion   = $p->type == RtmpPacket::TYPE_INVOKE_AMF0 ? 0 : 3;
         if ($amfVersion == 3 && $p->payload {0} == chr(0)) {
             $p->payload = substr($p->payload, 1);
             $amfVersion = 0;
         }
 
-        $stream = new SabreAMF_InputStream($p->payload);
-        $deserializer = $amfVersion == 0 ? new SabreAMF_AMF0_Deserializer($stream) : new SabreAMF_AMF3_Deserializer($stream);
-        $this->commandName = $deserializer->readAMFData();
+        $stream              = new SabreAMF_InputStream($p->payload);
+        $deserializer        = $amfVersion == 0 ? new SabreAMF_AMF0_Deserializer($stream) : new SabreAMF_AMF3_Deserializer($stream);
+        $this->commandName   = $deserializer->readAMFData();
         $this->transactionId = $deserializer->readAMFData();
         $this->commandObject = $deserializer->readAMFData();
         try

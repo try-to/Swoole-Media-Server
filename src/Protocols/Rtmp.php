@@ -107,8 +107,7 @@ class Rtmp
 
     private function rtmpChunkRead($buffer)
     {
-        echo 'handshake:' . $this->handshakeState . PHP_EOL;
-        echo PHP_EOL . 'packet:' . PHP_EOL;
+        echo 'packet:' . PHP_EOL;
         var_dump($buffer);
     }
 

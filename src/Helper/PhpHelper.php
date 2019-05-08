@@ -16,7 +16,7 @@ class PhpHelper
     {
         return PHP_SAPI === 'cli';
     }
-    
+
     /**
      * 是否是mac环境
      *

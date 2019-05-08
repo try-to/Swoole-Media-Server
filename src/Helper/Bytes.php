@@ -15,7 +15,7 @@ class Bytes
      */
     public static function getBytes_10($str)
     {
-        $len = strlen($str);
+        $len   = strlen($str);
         $bytes = array();
         for ($i = 0; $i < $len; $i++) {
             if (ord($str[$i]) >= 128) {
@@ -48,7 +48,7 @@ class Bytes
      */
     public static function integerToBytes($val)
     {
-        $byt = array();
+        $byt    = array();
         $byt[0] = ($val & 0xff);
         $byt[1] = ($val >> 8 & 0xff);
         $byt[2] = ($val >> 16 & 0xff);
@@ -81,7 +81,7 @@ class Bytes
      */
     public static function shortToBytes($val)
     {
-        $byt = array();
+        $byt    = array();
         $byt[0] = ($val & 0xff);
         $byt[1] = ($val >> 8 & 0xff);
         return $byt;

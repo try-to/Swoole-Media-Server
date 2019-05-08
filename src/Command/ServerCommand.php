@@ -2,8 +2,8 @@
 
 namespace TrytoMediaServer\Command;
 
-use function TrytoMediaServer\Helper\tryto_error;
 use function TrytoMediaServer\Helper\tryto_env;
+use function TrytoMediaServer\Helper\tryto_error;
 
 class ServerCommand
 {
@@ -14,8 +14,8 @@ class ServerCommand
 
     public function __construct()
     {
-        $this->logo = HelpMessage::$logo . PHP_EOL . HelpMessage::$version;
-        $this->desc = $this->logo . PHP_EOL . HelpMessage::$usage . PHP_EOL . HelpMessage::$desc;
+        $this->logo  = HelpMessage::$logo . PHP_EOL . HelpMessage::$version;
+        $this->desc  = $this->logo . PHP_EOL . HelpMessage::$usage . PHP_EOL . HelpMessage::$desc;
         $this->usage = $this->logo . PHP_EOL . HelpMessage::$usage;
     }
 
@@ -49,7 +49,7 @@ class ServerCommand
             $masterPid = $this->serverSetting['masterPid'];
             // 使用swoole_process::kill代替posix_kill
             \swoole_process::kill($masterPid);
-            $timeout = 60;
+            $timeout   = 60;
             $startTime = time();
             while (true) {
                 // Check the process status
@@ -125,15 +125,15 @@ class ServerCommand
     public function isRunning()
     {
         $masterIsLive = false;
-        $pFile = tryto_env('server.pid_file');
+        $pFile        = tryto_env('server.pid_file');
         // 判断pid文件是否否存在
         if (file_exists($pFile)) {
             // 获取pid文件内容
-            $pidFile = file_get_contents($pFile);
-            $pids = explode(',', $pidFile);
-            $this->serverSetting['masterPid'] = $pids[0];
+            $pidFile                           = file_get_contents($pFile);
+            $pids                              = explode(',', $pidFile);
+            $this->serverSetting['masterPid']  = $pids[0];
             $this->serverSetting['managerPid'] = $pids[1];
-            $masterIsLive = $this->serverSetting['masterPid'] && @\swoole_process::kill($this->serverSetting['managerPid'], 0);
+            $masterIsLive                      = $this->serverSetting['masterPid'] && @\swoole_process::kill($this->serverSetting['managerPid'], 0);
         }
         return $masterIsLive;
     }
